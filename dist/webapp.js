@@ -12,17 +12,20 @@ app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
 const users = [];
 // Отправка frontend страницы
 app.get('/', (req, res) => {
+    console.log('Запрос на главную страницу');
     res.sendFile(path_1.default.join(__dirname, 'public', 'frontend.html'));
 });
 // Генерация реферальной ссылки на основе Telegram ID
 app.post('/generate', (req, res) => {
     const telegramId = req.body.telegramId; // Получение ID пользователя из запроса
+    console.log(`Получен запрос на генерацию реферальной ссылки для Telegram ID: ${telegramId}`); // Логирование Telegram ID
     if (!telegramId) {
         return res.status(400).json({ error: 'Telegram ID is required' });
     }
     const existingUser = users.find(user => user.telegramId === telegramId);
     if (existingUser) {
         // Если пользователь уже существует, возвращаем его реферальную ссылку
+        console.log(`Пользователь с Telegram ID ${telegramId} уже существует. Возвращаем его реферальную ссылку.`); // Логирование существующего пользователя
         return res.json({ referralLink: existingUser.referralLink });
     }
     else {
@@ -31,6 +34,7 @@ app.post('/generate', (req, res) => {
         // Если это новый пользователь, создаём новую реферальную ссылку
         const referralLink = `https://t.me/${botName}?start=${telegramId}`;
         users.push({ telegramId, referralLink });
+        console.log(`Создана новая реферальная ссылка для Telegram ID ${telegramId}: ${referralLink}`); // Логирование новой ссылки
         return res.json({ referralLink });
     }
 });

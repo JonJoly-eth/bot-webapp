@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded'), () => {
     // Инициализация Telegram WebApp API
     if (typeof window.Telegram === 'undefined' || typeof window.Telegram.WebApp === 'undefined') {
         console.error('Telegram WebApp API is not available. Please run the app inside Telegram.');
         return;
     }
-    
+}
     const telegram = window.Telegram.WebApp;
 
     // Получаем ID пользователя через Telegram WebApp API
@@ -30,15 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Отображение сгенерированной ссылки
             if (data.referralLink) {
-                document.getElementById('referralLink').textContent = `Your referral link: ${data.referralLink}`;
+                window.open(data.referralLink, '_blank'); // Открытие ссылки в новом окне
             } else {
-                document.getElementById('referralLink').textContent = `Error: ${data.error}`;
+                alert(`Error: ${data.error}`); // Сообщение об ошибке
             }
         } catch (error) {
             console.error('Error:', error);
         }
     });
-});
-
-
 
