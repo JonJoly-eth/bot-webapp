@@ -26,11 +26,8 @@ app.post('/generate', (req, res) => {
         return res.json({ referralLink: existingUser.referralLink });
     }
     else {
-    }
-    // получаем имя бота 
-    const botName = 'invtfrds_bot';
-    if (!botName) {
-        return res.status(500).json({ error: 'Bot name is not set' });
+        // получаем имя бота 
+        const botName = 'invtfrds_bot';
         // Если это новый пользователь, создаём новую реферальную ссылку
         const referralLink = `https://t.me/${botName}?start=${telegramId}`;
         users.push({ telegramId, referralLink });
