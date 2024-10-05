@@ -45,7 +45,7 @@ const openButton = "OpenAPP";
 const referralButton = "Получить реферальную ссылку";
 //Build keyboards
 const firstMenuMarkup = new grammy_1.InlineKeyboard().text(nextButton, nextButton);
-const secondMenuMarkup = new grammy_1.InlineKeyboard().text(backButton, backButton).webApp(openButton, "https://93fd-45-225-214-219.ngrok-free.app").text(referralButton, "get_referral");
+const secondMenuMarkup = new grammy_1.InlineKeyboard().text(backButton, backButton).webApp(openButton, "https://05ab-45-225-214-219.ngrok-free.app").text(referralButton, "get_referral");
 //This handler sends a menu with the inline buttons we pre-assigned above
 bot.command("menu", async (ctx) => {
     await ctx.reply(firstMenu, {
