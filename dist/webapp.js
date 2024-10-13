@@ -16,27 +16,47 @@ app.get('/', (req, res) => {
     res.sendFile(path_1.default.join(__dirname, 'public', 'frontend.html'));
 });
 // Генерация реферальной ссылки на основе Telegram ID
-app.post('/generate', (req, res) => {
-    const telegramId = req.body.telegramId; // Получение ID пользователя из запроса
-    console.log(`Получен запрос на генерацию реферальной ссылки для Telegram ID: ${telegramId}`); // Логирование Telegram ID
-    if (!telegramId) {
-        return res.status(400).json({ error: 'Telegram ID is required' });
+app.get('/generate', async (req, res) => {
+    try {
+        const telegramId = String(req.query.telegramId); // Получение ID пользователя из запроса
+        console.log(`Получен запрос на генерацию реферальной ссылки для Telegram ID: ${telegramId}`); // Логирование Telegram ID
+        if (!telegramId) {
+            console.error('Ошибка: Telegram ID is required');
+            return res.status(400).json({ error: 'Telegram ID is required' });
+        }
+        const existingUser = users.find(user => user.telegramId === telegramId);
+        let referralLink;
+        if (existingUser) {
+            // Если пользователь уже существует, возвращаем его реферальную ссылку
+            console.log(`Пользователь с Telegram ID ${telegramId} уже существует. Возвращаем его реферальную ссылку.`); // Логирование существующего пользователя
+            referralLink = existingUser.referralLink;
+        }
+        else {
+            // получаем имя бота 
+            const botName = 'invtfrds_bot';
+            // Если это новый пользователь, создаём новую реферальную ссылку
+            referralLink = `https://t.me/${botName}?start=${telegramId}`;
+            users.push({ telegramId, referralLink });
+            console.log(`Создана новая реферальная ссылка для Telegram ID ${telegramId}: ${referralLink}`); // Логирование новой ссылки
+            return res.json({ referralLink });
+        }
     }
-    const existingUser = users.find(user => user.telegramId === telegramId);
-    if (existingUser) {
-        // Если пользователь уже существует, возвращаем его реферальную ссылку
-        console.log(`Пользователь с Telegram ID ${telegramId} уже существует. Возвращаем его реферальную ссылку.`); // Логирование существующего пользователя
-        return res.json({ referralLink: existingUser.referralLink });
+    catch (error) {
+        console.error('Ошибка в обработке запроса /generate:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
-    else {
-        // получаем имя бота 
-        const botName = 'invtfrds_bot';
-        // Если это новый пользователь, создаём новую реферальную ссылку
-        const referralLink = `https://t.me/${botName}?start=${telegramId}`;
-        users.push({ telegramId, referralLink });
-        console.log(`Создана новая реферальная ссылка для Telegram ID ${telegramId}: ${referralLink}`); // Логирование новой ссылки
-        return res.json({ referralLink });
+});
+// Новый маршрут для генерации URL-ссылки для отправки сообщения
+app.post('/invite', (req, res) => {
+    const telegramId = req.body.telegramId;
+    const referralLink = users.find(user => user.telegramId === telegramId)?.referralLink;
+    if (!referralLink) {
+        return res.status(404).json({ error: 'Referral link not found' });
     }
+    const botName = 'invtfrds_bot';
+    const message = `Привет! Вот моя реферальная ссылка: ${referralLink}`;
+    const inviteLink = `https://t.me/${botName}?start=${telegramId}&msg=${encodeURIComponent(message)}`;
+    return res.json({ inviteLink });
 });
 // Запуск веб-сервера
 app.listen(5000, () => {

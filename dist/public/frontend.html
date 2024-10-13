@@ -1,23 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Referral App</title>
-</head>
-<body>
-    <h1>Invite Friends</h1>
-
-    <button id="generateBtn">Generate Referral Link</button>
-    
-    <!-- Удален элемент для отображения реферальной ссылки, так как она теперь открывается в новом окне -->
-    
-    <button id="meetFriendsBtn">Meet friends</button>
-    <p id="meetfriends"></p>
-  
+    <title>Генерация реферальной ссылки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+    </style>
     <!-- Подключаем ваш JavaScript файл -->
     <script src="frontend.js"></script> 
+</head>
+<body>
+    <h1>Генерация реферальной ссылки</h1>
+    <button id="generateButton">Сгенерировать ссылку</button>
+    <p id="referralLink"></p>
+    <script>
+        document.getElementById('generateButton').addEventListener('click', () => {
+            // Получение Telegram ID (замените на ваш метод получения ID)
+            const telegramId = 'YOUR_TELEGRAM_ID'; // Здесь должен быть метод для получения user's telegramId
+
+            fetch(`/generate?telegramId=${telegramId}`, {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.referralLink) {
+                    const newWindow = window.open('', '_blank');
+                    newWindow.document.write(`<p>Сгенерированная реферальная ссылка: <a href="${data.referralLink}" target="_blank">${data.referralLink}</a></p>`);
+                } else {
+                    console.error(`Ошибка: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+        });
+    </script>
+
 </body>
 </html>
-
-
