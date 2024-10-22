@@ -32,8 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
               if (data.referralLink) {
                   const message = `Привет! Вот моя реферальная ссылка: ${data.referralLink}`;
                   const encodedMessage = encodeURIComponent(message);
-                  const telegramUrl = `https://t.me/share/url?url=${encodedMessage}`;
-
+                  
+                  // Формируем URL для отправки сообщения
+                  const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(data.referralLink)}&text=${encodedMessage}`;
+                  
                   // Открытие ссылки на Telegram с сообщением
                   window.open(telegramUrl, '_blank');
               } else {
@@ -44,8 +46,39 @@ document.addEventListener('DOMContentLoaded', () => {
               console.error('Ошибка:', error);
           });
       });
-  } 
+
+      // Обработка кнопки "Friend's List"
+      document.getElementById('friendsListButton').addEventListener('click', () => {
+          const telegramId = getTelegramUserId();
+
+          if (!telegramId) {
+              console.error('Telegram ID не доступен.');
+              return;
+          }
+
+          // Запрос на получение списка друзей, которые перешли по реферальной ссылке
+          fetch(`/friends-list?telegramId=${telegramId}`, {
+              method: 'GET',
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.friends && data.friends.length > 0) {
+                  const friendsList = data.friends.map(friend => `<li>${friend.username}</li>`).join('');
+                  document.getElementById('friendsList').innerHTML = `<ul>${friendsList}</ul>`;
+                  document.getElementById('friendsList').style.display = 'block'; // Показываем список друзей
+              } else {
+                  console.error('Список друзей пуст или не найден.');
+              }
+          })
+          .catch(error => {
+              console.error('Ошибка:', error);
+          });
+      });
+  }
 });
+
+
+      
 
 
 

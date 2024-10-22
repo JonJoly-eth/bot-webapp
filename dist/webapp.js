@@ -8,7 +8,6 @@ const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
-// Изменяем структуру массива: используем поле telegramId вместо id
 const users = [];
 // Отправка frontend страницы
 app.get('/', (req, res) => {
@@ -38,15 +37,24 @@ app.get('/generate', async (req, res) => {
             referralLink = `https://t.me/${botName}?start=${telegramId}`;
             users.push({ telegramId, referralLink });
             console.log(`Создана новая реферальная ссылка для Telegram ID ${telegramId}: ${referralLink}`); // Логирование новой ссылки
-            return res.json({ referralLink });
         }
+        return res.json({ referralLink });
     }
     catch (error) {
         console.error('Ошибка в обработке запроса /generate:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-// Новый маршрут для генерации URL-ссылки для отправки сообщения
+// Новый маршрут для получения списка друзей
+app.get('/friends-list', (req, res) => {
+    const telegramId = String(req.query.telegramId); // Получение ID пользователя из запроса
+    console.log(`Получен запрос на получение списка друзей для Telegram ID: ${telegramId}`);
+    // Находим пользователей, которые были приглашены данным пользователем
+    const friends = users.filter(user => user.referredBy === telegramId);
+    // Отправляем список пользователей
+    return res.json({ friends });
+});
+// Обработка приглашения друзей
 app.post('/invite', (req, res) => {
     const telegramId = req.body.telegramId;
     const referralLink = users.find(user => user.telegramId === telegramId)?.referralLink;
