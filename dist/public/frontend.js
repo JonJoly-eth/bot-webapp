@@ -1,30 +1,56 @@
-document.getElementById('generateButton').addEventListener('click', () => {
-  const telegramId = getTelegramUserId(); // Получаем Telegram ID
+document.addEventListener('DOMContentLoaded', () => {
+  // Проверяем, доступен ли объект Telegram
+  if (typeof window.Telegram === 'undefined') {
+      console.error('Telegram WebApp API недоступен.');
+      return;
+  } else {
+      console.log('Telegram WebApp API доступен');
 
-  if (!telegramId) {
-      return; // Если ID не доступен, прекращаем выполнение
+      // Инициализируем WebApp
+      window.Telegram.WebApp.ready();
+      console.log("initDataUnsafe: ", window.Telegram.WebApp.initDataUnsafe);
+
+      // Получение Telegram ID
+      function getTelegramUserId() {
+          const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+          return user ? user.id : null;
+      }
+
+      // Обработка кнопки генерации ссылки
+      document.getElementById('generateButton').addEventListener('click', () => {
+          const telegramId = getTelegramUserId();
+
+          if (!telegramId) {
+              console.error('Telegram ID не доступен.');
+              return;
+          }
+
+          fetch(`/generate?telegramId=${telegramId}`)
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error(`Ошибка HTTP: ${response.status}`);
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  if (data.referralLink) {
+                      document.getElementById('referralLink').innerHTML = 
+                          `Сгенерированная реферальная ссылка: <a href="${data.referralLink}" target="_blank">${data.referralLink}</a>`;
+                  } else {
+                      console.error(`Ошибка: ${data.error}`);
+                  }
+              })
+              .catch(error => {
+                  console.error('Ошибка при выполнении запроса:', error);
+              });
+      });
   }
-
-  fetch(`/generate?telegramId=${telegramId}`, {
-      method: 'GET',
-  })
-  .then(response => {
-      if (!response.ok) {
-          throw new Error(`Ошибка сервера: ${response.status}`);
-      }
-      return response.json();
-  })
-  .then(data => {
-      if (data.referralLink) {
-          document.getElementById('referralLink').innerHTML = `Сгенерированная реферальная ссылка: <a href="${data.referralLink}" target="_blank">${data.referralLink}</a>`;
-      } else {
-          console.error(`Ошибка: ${data.error}`);
-      }
-  })
-  .catch(error => {
-      console.error('Ошибка:', error);
-  });
 });
+
+
+
+
+
 
 
 
