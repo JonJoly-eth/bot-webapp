@@ -13,27 +13,43 @@
             padding: 10px 15px;
             font-size: 16px;
         }
+        #referralLink {
+            margin-top: 20px;
+            font-size: 16px;
+            color: green;
+        }
     </style>
     <!-- Подключаем ваш JavaScript файл -->
-    <script src="frontend.js"></script> 
+    <script src="frontend.js" defer></script> 
 </head>
 <body>
     <h1>Генерация реферальной ссылки</h1>
     <button id="generateButton">Сгенерировать ссылку</button>
     <p id="referralLink"></p>
-    <script>
+
+</body>
+</html>
+   
+  <!-- <script>  отсюда идет старый код .
         document.getElementById('generateButton').addEventListener('click', () => {
             // Получение Telegram ID (замените на ваш метод получения ID)
-            const telegramId = 'YOUR_TELEGRAM_ID'; // Здесь должен быть метод для получения user's telegramId
+            
+            const telegramId = 'window.Telegram?.WebApp?.initDataUnsafe?.user?.id';
+
+            if (!telegramId) {
+                console.error('Telegram ID не доступен.');
+                return;
+            }
 
             fetch(`/generate?telegramId=${telegramId}`, {
                 method: 'GET',
             })
             .then(response => response.json())
             .then(data => {
+                console.log(data);
                 if (data.referralLink) {
-                    const newWindow = window.open('', '_blank');
-                    newWindow.document.write(`<p>Сгенерированная реферальная ссылка: <a href="${data.referralLink}" target="_blank">${data.referralLink}</a></p>`);
+                    // Отображаем ссылку на странице
+                    document.getElementById('referralLink').innerHTML = `Сгенерированная реферальная ссылка: <a href="${data.referralLink}" target="_blank">${data.referralLink}</a>`;
                 } else {
                     console.error(`Ошибка: ${data.error}`);
                 }
@@ -43,6 +59,5 @@
             });
         });
     </script>
-
 </body>
 </html>
