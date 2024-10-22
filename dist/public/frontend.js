@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Проверяем, доступен ли объект Telegram
   if (typeof window.Telegram === 'undefined') {
       console.error('Telegram WebApp API недоступен.');
-      return;
   } else {
       console.log('Telegram WebApp API доступен');
 
@@ -16,8 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
           return user ? user.id : null;
       }
 
-      // Обработка кнопки генерации ссылки
-      document.getElementById('generateButton').addEventListener('click', () => {
+      // Обработка кнопки "Meet Friends"
+      document.getElementById('meetFriendsButton').addEventListener('click', () => {
           const telegramId = getTelegramUserId();
 
           if (!telegramId) {
@@ -25,27 +23,34 @@ document.addEventListener('DOMContentLoaded', () => {
               return;
           }
 
-          fetch(`/generate?telegramId=${telegramId}`)
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error(`Ошибка HTTP: ${response.status}`);
-                  }
-                  return response.json();
-              })
-              .then(data => {
-                  if (data.referralLink) {
-                      document.getElementById('referralLink').innerHTML = 
-                          `Сгенерированная реферальная ссылка: <a href="${data.referralLink}" target="_blank">${data.referralLink}</a>`;
-                  } else {
-                      console.error(`Ошибка: ${data.error}`);
-                  }
-              })
-              .catch(error => {
-                  console.error('Ошибка при выполнении запроса:', error);
-              });
+          // Генерация реферальной ссылки
+          fetch(`/generate?telegramId=${telegramId}`, {
+              method: 'GET',
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.referralLink) {
+                  const message = `Привет! Вот моя реферальная ссылка: ${data.referralLink}`;
+                  const encodedMessage = encodeURIComponent(message);
+                  const telegramUrl = `https://t.me/share/url?url=${encodedMessage}`;
+
+                  // Открытие ссылки на Telegram с сообщением
+                  window.open(telegramUrl, '_blank');
+              } else {
+                  console.error(`Ошибка: ${data.error}`);
+              }
+          })
+          .catch(error => {
+              console.error('Ошибка:', error);
+          });
       });
-  }
+  } 
 });
+
+
+
+
+
 
 
 
