@@ -15,7 +15,7 @@ const singleMenu = "<b>Menu 1</b>\n\nA beautiful menu with a shiny inline button
 const openButton = "OpenAPP";
 const referralButton = "Получить реферальную ссылку";
 //Build keyboards
-const singleMenuMarkup = new grammy_1.InlineKeyboard().webApp(openButton, 'https://824c-45-225-214-219.ngrok-free.app').text(referralButton, 'get_referral');
+const singleMenuMarkup = new grammy_1.InlineKeyboard().webApp(openButton, 'https://8f46-45-225-214-219.ngrok-free.app').text(referralButton, 'get_referral');
 // Обработчик команды /start, сразу показывающий меню
 bot.command('start', async (ctx) => {
     console.log('Команда старт получена от пользователя', ctx.from);

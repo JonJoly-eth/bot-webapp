@@ -48,32 +48,47 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // Обработка кнопки "Friend's List"
-      document.getElementById('friendsListButton').addEventListener('click', () => {
-          const telegramId = getTelegramUserId();
+      // Обработка кнопки "Friend's List"
+document.getElementById('friendsListButton').addEventListener('click', () => {
+    const telegramId = getTelegramUserId();
 
-          if (!telegramId) {
-              console.error('Telegram ID не доступен.');
-              return;
-          }
+    if (!telegramId) {
+        console.error('Telegram ID не доступен.');
+        return;
+    }
 
-          // Запрос на получение списка друзей, которые перешли по реферальной ссылке
-          fetch(`/friends-list?telegramId=${telegramId}`, {
-              method: 'GET',
-          })
-          .then(response => response.json())
-          .then(data => {
-              if (data.friends && data.friends.length > 0) {
-                  const friendsList = data.friends.map(friend => `<li>${friend.username}</li>`).join('');
-                  document.getElementById('friendsList').innerHTML = `<ul>${friendsList}</ul>`;
-                  document.getElementById('friendsList').style.display = 'block'; // Показываем список друзей
-              } else {
-                  console.error('Список друзей пуст или не найден.');
-              }
-          })
-          .catch(error => {
-              console.error('Ошибка:', error);
-          });
-      });
+    // Запрос на получение списка друзей
+    fetch(`/friends-list?telegramId=${telegramId}`, {
+        method: 'GET',
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Ошибка в запросе к /friends-list');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const friendsListDiv = document.getElementById('friendsList');
+        friendsListDiv.innerHTML = ''; // Очищаем предыдущий список
+
+        if (data.friends && data.friends.length > 0) {
+            data.friends.forEach(friend => {
+                const friendItem = document.createElement('div');
+                friendItem.textContent = friend.telegramId; // Здесь выводится Telegram ID
+                friendsListDiv.appendChild(friendItem);
+            });
+        } else {
+            friendsListDiv.innerHTML = 'Друзья не найдены.'; // Отображаем сообщение, если друзья не найдены
+        }
+
+        // Отображаем список друзей
+        friendsListDiv.style.display = 'block';
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+    });
+});
+
   }
 });
 
