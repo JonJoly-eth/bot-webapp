@@ -19,7 +19,8 @@ app.get('/', (req, res) => {
 app.get('/generate', async (req, res) => {
     try {
         const telegramId = String(req.query.telegramId); // Получаем Telegram ID из запроса
-        console.log(`Получен запрос на генерацию реферальной ссылки для Telegram ID: ${telegramId}`);
+        const referredBy = req.query.referredBy ? String(req.query.referredBy) : undefined; // Получаем реферальный ID
+        console.log(`Получен запрос на генерацию реферальной ссылки для Telegram ID: ${telegramId}, пригласивший: ${referredBy || 'отсутствует'}`);
         if (!telegramId) {
             console.error('Ошибка: Telegram ID обязателен');
             return res.status(400).json({ error: 'Telegram ID is required' });
@@ -31,10 +32,9 @@ app.get('/generate', async (req, res) => {
             console.log(`Пользователь с Telegram ID ${telegramId} уже существует. Возвращаем его реферальную ссылку.`);
         }
         else {
-            // Создаём нового пользователя без хранения ссылки
-            const referredBy = req.query.referredBy ? String(req.query.referredBy) : undefined;
+            // Добавляем нового пользователя, если его нет в системе
+            console.log(`Добавляется новый пользователь с Telegram ID ${telegramId} и пригласившим: ${referredBy || 'отсутствует'}`);
             users.push({ telegramId, referredBy });
-            console.log(`Добавлен новый пользователь с Telegram ID ${telegramId} и пригласившим: ${referredBy}`);
         }
         console.log('Текущий список пользователей:', JSON.stringify(users, null, 2));
         return res.json({ referralLink });

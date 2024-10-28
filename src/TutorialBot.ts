@@ -18,7 +18,7 @@ const openButton = "OpenAPP";
 const referralButton= "Получить реферальную ссылку"
 
 //Build keyboards
-const singleMenuMarkup = new InlineKeyboard().webApp(openButton, 'https://8f46-45-225-214-219.ngrok-free.app').text(referralButton, 'get_referral');
+const singleMenuMarkup = new InlineKeyboard().webApp(openButton, 'https://780d-190-195-33-220.ngrok-free.app').text(referralButton, 'get_referral');
 
 // Обработчик команды /start, сразу показывающий меню
 bot.command('start', async (ctx: Context) => {

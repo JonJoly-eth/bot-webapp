@@ -24,7 +24,9 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/generate', async (req: Request, res: Response) => {
     try {
         const telegramId: string = String(req.query.telegramId); // Получаем Telegram ID из запроса
-        console.log(`Получен запрос на генерацию реферальной ссылки для Telegram ID: ${telegramId}`);
+        const referredBy: string | undefined = req.query.referredBy ? String(req.query.referredBy) : undefined; // Получаем реферальный ID
+
+        console.log(`Получен запрос на генерацию реферальной ссылки для Telegram ID: ${telegramId}, пригласивший: ${referredBy || 'отсутствует'}`);
 
         if (!telegramId) {
             console.error('Ошибка: Telegram ID обязателен');
@@ -38,10 +40,9 @@ app.get('/generate', async (req: Request, res: Response) => {
             // Если пользователь уже существует, возвращаем его реферальную ссылку
             console.log(`Пользователь с Telegram ID ${telegramId} уже существует. Возвращаем его реферальную ссылку.`);
         } else {
-            // Создаём нового пользователя без хранения ссылки
-            const referredBy = req.query.referredBy ? String(req.query.referredBy) : undefined;
+            // Добавляем нового пользователя, если его нет в системе
+            console.log(`Добавляется новый пользователь с Telegram ID ${telegramId} и пригласившим: ${referredBy || 'отсутствует'}`);
             users.push({ telegramId, referredBy });
-            console.log(`Добавлен новый пользователь с Telegram ID ${telegramId} и пригласившим: ${referredBy}`);
         }
 
         console.log('Текущий список пользователей:', JSON.stringify(users, null, 2));
@@ -107,3 +108,5 @@ app.post('/invite', (req: Request, res: Response) => {
 app.listen(5000, () => {
     console.log('Сервер запущен на http://localhost:5000');
 });
+
+
