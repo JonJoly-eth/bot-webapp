@@ -22,35 +22,26 @@ app.get('/', (req: Request, res: Response) => {
 
 // Генерация реферальной ссылки на основе Telegram ID
 app.get('/generate', async (req: Request, res: Response) => {
-    try {
-        const telegramId: string = String(req.query.telegramId); // Получаем Telegram ID из запроса
-        const referredBy: string | undefined = req.query.referredBy ? String(req.query.referredBy) : undefined; // Получаем реферальный ID
+    const telegramId = String(req.query.telegramId || '').trim();
+    const referredBy = req.query.referredBy ? String(req.query.referredBy).trim() : undefined;
 
-        console.log(`Получен запрос на генерацию реферальной ссылки для Telegram ID: ${telegramId}, пригласивший: ${referredBy || 'отсутствует'}`);
-
-        if (!telegramId) {
-            console.error('Ошибка: Telegram ID обязателен');
-            return res.status(400).json({ error: 'Telegram ID is required' });
-        }
-
-        const existingUser = users.find(user => user.telegramId === telegramId);
-        let referralLink = `https://t.me/${botName}?start=${telegramId}`;
-        
-        if (existingUser) {
-            // Если пользователь уже существует, возвращаем его реферальную ссылку
-            console.log(`Пользователь с Telegram ID ${telegramId} уже существует. Возвращаем его реферальную ссылку.`);
-        } else {
-            // Добавляем нового пользователя, если его нет в системе
-            console.log(`Добавляется новый пользователь с Telegram ID ${telegramId} и пригласившим: ${referredBy || 'отсутствует'}`);
-            users.push({ telegramId, referredBy });
-        }
-
-        console.log('Текущий список пользователей:', JSON.stringify(users, null, 2));
-        return res.json({ referralLink });
-    } catch (error) {
-        console.error('Ошибка в обработке запроса /generate:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+    if (!telegramId) {
+        console.error('Ошибка: Telegram ID обязателен');
+        return res.status(400).json({ error: 'Telegram ID is required' });
     }
+
+    const existingUser = users.find(user => user.telegramId === telegramId);
+    const referralLink = `https://t.me/${botName}?start=${telegramId}`;
+
+    if (existingUser) {
+        console.log(`Пользователь с Telegram ID ${telegramId} уже существует. Возвращаем его реферальную ссылку.`);
+    } else {
+        console.log(`Добавляется новый пользователь с Telegram ID ${telegramId} и пригласившим: ${referredBy || 'отсутствует'}`);
+        users.push({ telegramId, referredBy });
+    }
+
+    console.log('Текущий список пользователей:', JSON.stringify(users, null, 2));
+    return res.json({ referralLink });
 });
 
 // Новый маршрут для проверки массива users в консоли
@@ -61,52 +52,46 @@ app.get('/check-users', (req: Request, res: Response) => {
 
 // Новый маршрут для получения списка друзей
 app.get('/friends-list', (req: Request, res: Response) => {
-    try {
-        const telegramId = String(req.query.telegramId); // Получаем Telegram ID из запроса
-        console.log(`Получен запрос на получение списка друзей для Telegram ID: ${telegramId}`);
-        
-        // Находим пользователей, которые были приглашены данным пользователем
-        const friends = users.filter(user => user.referredBy === telegramId);
-        console.log(`Найдено ${friends.length} друзей для пользователя с ID ${telegramId}`);
+    const telegramId = String(req.query.telegramId || '').trim();
 
-        if (friends.length > 0) {
-            const friendList = friends.map(user => user.telegramId);
-            return res.json({ friends: friendList });
-        } else {
-            console.warn(`Список друзей пуст для Telegram ID ${telegramId}`);
-            return res.status(404).json({ message: 'Список друзей пуст или не найден.' });
-        }
-    } catch (error) {
-        console.error('Ошибка в обработке запроса /friends-list:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+    if (!telegramId) {
+        console.error('Ошибка: Telegram ID обязателен');
+        return res.status(400).json({ error: 'Telegram ID is required' });
+    }
+
+    console.log(`Получен запрос на получение списка друзей для Telegram ID: ${telegramId}`);
+    const friends = users.filter(user => user.referredBy === telegramId);
+
+    if (friends.length > 0) {
+        console.log(`Найдено ${friends.length} друзей для пользователя с ID ${telegramId}`);
+        return res.json({ friends: friends.map(user => user.telegramId) });
+    } else {
+        console.warn(`Список друзей пуст для Telegram ID ${telegramId}`);
+        return res.status(404).json({ message: 'Список друзей пуст или не найден.' });
     }
 });
 
 // Обработка приглашения друзей
 app.post('/invite', (req: Request, res: Response) => {
-    try {
-        const telegramId = req.body.telegramId;
+    const telegramId = req.body.telegramId?.toString().trim();
 
-        if (!telegramId) {
-            console.error('Ошибка: Telegram ID обязателен для приглашения');
-            return res.status(400).json({ error: 'Telegram ID is required' });
-        }
-
-        const referralLink = `https://t.me/${botName}?start=${telegramId}`;
-        const message = `Привет! Вот моя реферальная ссылка: ${referralLink}`;
-        const inviteLink = `https://t.me/${botName}?start=${telegramId}&msg=${encodeURIComponent(message)}`;
-
-        console.log(`Сформирована ссылка приглашения для Telegram ID ${telegramId}: ${inviteLink}`);
-        return res.json({ inviteLink });
-    } catch (error) {
-        console.error('Ошибка в обработке запроса /invite:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+    if (!telegramId) {
+        console.error('Ошибка: Telegram ID обязателен для приглашения');
+        return res.status(400).json({ error: 'Telegram ID is required' });
     }
+
+    const referralLink = `https://t.me/${botName}?start=${telegramId}`;
+    const message = `Привет! Вот моя реферальная ссылка: ${referralLink}`;
+    const inviteLink = `https://t.me/${botName}?start=${telegramId}&msg=${encodeURIComponent(message)}`;
+
+    console.log(`Сформирована ссылка приглашения для Telegram ID ${telegramId}: ${inviteLink}`);
+    return res.json({ inviteLink });
 });
 
 // Запуск веб-сервера
 app.listen(5000, () => {
     console.log('Сервер запущен на http://localhost:5000');
 });
+
 
 
